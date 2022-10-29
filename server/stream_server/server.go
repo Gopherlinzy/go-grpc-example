@@ -3,6 +3,7 @@ package main
 import (
 	pb "go-grpc-example/proto/stream"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/alts"
 	"io"
 	"log"
 	"net"
@@ -16,7 +17,8 @@ type StreamService struct {
 const PORT = "8888"
 
 func main() {
-	server := grpc.NewServer()
+	altsTC := alts.NewServerCreds(alts.DefaultServerOptions())
+	server := grpc.NewServer(grpc.Creds(altsTC)) //创建 gRPC Server 对象
 	pb.RegisterStreamServiceServer(server, &StreamService{})
 
 	lis, err := net.Listen("tcp", ":"+PORT)
@@ -62,6 +64,32 @@ func (s *StreamService) Record(stream pb.StreamService_RecordServer) error {
 	return nil
 }
 
+//双向流，由客户端发起流式的RPC方法请求，服务端以同样的流式RPC方法响应请求
+//首个请求一定是client发起，具体交互方法（谁先谁后，一次发多少，响应多少，什么时候关闭）根据程序编写方式来确定（可以结合协程）
 func (s *StreamService) Route(stream pb.StreamService_RouteServer) error {
+	n := 0
+	for {
+		err := stream.Send(&pb.StreamResponse{
+			Pt: &pb.StreamPoint{
+				Name:  "gPRC Stream Client: Route",
+				Value: int32(n),
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+		r, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		n++
+
+		log.Printf("stream.Recv pt.name: %s, pt.value: %d", r.Pt.Name, r.Pt.Value)
+	}
 	return nil
 }
