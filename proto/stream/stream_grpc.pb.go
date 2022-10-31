@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.20.1
-// source: stream.proto
+// source: proto/stream/stream.proto
 
 package stream
 
@@ -22,8 +22,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StreamServiceClient interface {
+	//List：服务器端流式 RPC
 	List(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (StreamService_ListClient, error)
+	//Record：客户端流式 RPC
 	Record(ctx context.Context, opts ...grpc.CallOption) (StreamService_RecordClient, error)
+	//Route：双向流式 RPC
 	Route(ctx context.Context, opts ...grpc.CallOption) (StreamService_RouteClient, error)
 }
 
@@ -136,8 +139,11 @@ func (x *streamServiceRouteClient) Recv() (*StreamResponse, error) {
 // All implementations must embed UnimplementedStreamServiceServer
 // for forward compatibility
 type StreamServiceServer interface {
+	//List：服务器端流式 RPC
 	List(*StreamRequest, StreamService_ListServer) error
+	//Record：客户端流式 RPC
 	Record(StreamService_RecordServer) error
+	//Route：双向流式 RPC
 	Route(StreamService_RouteServer) error
 	mustEmbedUnimplementedStreamServiceServer()
 }
@@ -266,5 +272,5 @@ var StreamService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "stream.proto",
+	Metadata: "proto/stream/stream.proto",
 }

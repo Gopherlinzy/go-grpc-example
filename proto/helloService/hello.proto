@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "./proto/helloService;hello";
+package proto;
+
+// 定义入参消息
+message HelloParam{
+  string name = 1;
+  string context = 2;
+}
+
+// 定义出参消息
+message HelloResult {
+  string result = 1;
+}
+
+// 定义service
+service HelloService{
+  // 定义方法
+  rpc SayHello(HelloParam) returns (HelloResult);
+}

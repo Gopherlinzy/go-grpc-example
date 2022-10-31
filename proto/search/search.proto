@@ -1,7 +1,8 @@
 syntax = "proto3";
 
-option go_package="./;search";
+option go_package="./proto/search;search";
 package proto;
+
 
 service SearchService {
     rpc Search(SearchRequest) returns (SearchResponse) {}
