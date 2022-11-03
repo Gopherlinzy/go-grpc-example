@@ -15,11 +15,6 @@ import (
 const PORT = "8888"
 
 func main() {
-	//creds, err := credentials.NewClientTLSFromFile("./conf/server/server.pem", "go-grpc-example")
-	//if err != nil {
-	//	log.Fatalf("credentials.NewClientTLSFromFile err: %v", err)
-	//}
-
 	// 公钥中读取和解析公钥/私钥对
 	cert, err := tls.LoadX509KeyPair("./conf/client/client.crt", "./conf/client/client.key")
 	if err != nil {
@@ -41,8 +36,9 @@ func main() {
 
 	c := credentials.NewTLS(&tls.Config{
 		Certificates: []tls.Certificate{cert},
-		ServerName:   "linzyblog.netlify.app",
-		RootCAs:      certPool,
+		ServerName:   "go-grpc-example",
+		//ServerName: "linzy",
+		RootCAs: certPool,
 	})
 
 	conn, err := grpc.Dial(":"+PORT, grpc.WithTransportCredentials(c))

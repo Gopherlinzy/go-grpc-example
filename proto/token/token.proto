@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "./proto/token;token";
+package tokenservice;
+
+// 验证参数
+message TokenValidateParam {
+  string token = 1;
+  int32 uid = 2;
+}
+
+// 请求参数
+message Request {
+  string name = 1;
+}
+
+// 请求返回
+message Response {
+  int32 uid = 1;
+  string name = 2;
+}
+
+// 服务
+service TokenService {
+  rpc Token(Request) returns (Response);
+}
