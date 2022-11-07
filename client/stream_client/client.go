@@ -3,18 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"go-grpc-example/pkg/Interceptor"
 	pb "go-grpc-example/proto/stream"
 	"google.golang.org/grpc"
 	"io"
 	"log"
-	"sync"
 	"time"
 )
 
 const PORT = "8888"
 
 func main() {
-	conn, err := grpc.Dial(":"+PORT, grpc.WithInsecure())
+	conn, err := grpc.Dial(":"+PORT, grpc.WithInsecure(), grpc.WithStreamInterceptor(Interceptor.StreamClientInterceptor()))
 	if err != nil {
 		log.Fatalf("grpc.Dial err: %v", err)
 	}
@@ -22,15 +22,15 @@ func main() {
 
 	client := pb.NewStreamServiceClient(conn)
 
-	err = printLists(client, &pb.StreamRequest{Pt: &pb.StreamPoint{Name: "gRPC Stream Client: List", Value: 1234}})
-	if err != nil {
-		log.Fatalf("printLists.err: %v", err)
-	}
-
-	err = printRecord(client, &pb.StreamRequest{Pt: &pb.StreamPoint{Name: "gRPC Stream Client: Record", Value: 9999}})
-	if err != nil {
-		log.Fatalf("printRecord.err: %v", err)
-	}
+	//err = printLists(client, &pb.StreamRequest{Pt: &pb.StreamPoint{Name: "gRPC Stream Client: List", Value: 1234}})
+	//if err != nil {
+	//	log.Fatalf("printLists.err: %v", err)
+	//}
+	//
+	//err = printRecord(client, &pb.StreamRequest{Pt: &pb.StreamPoint{Name: "gRPC Stream Client: Record", Value: 9999}})
+	//if err != nil {
+	//	log.Fatalf("printRecord.err: %v", err)
+	//}
 
 	err = printRoute(client, &pb.StreamRequest{Pt: &pb.StreamPoint{Name: "gRPC Stream Client: Route", Value: 1111}})
 	if err != nil {
@@ -105,7 +105,8 @@ func printRecord(client pb.StreamServiceClient, r *pb.StreamRequest) error {
 4. 发送完毕调用 stream.CloseSend()关闭stream 必须调用关闭 否则Server会一直尝试接收数据 一直报错...
 */
 func printRoute(client pb.StreamServiceClient, r *pb.StreamRequest) error {
-	var wg sync.WaitGroup
+	//var wg sync.WaitGroup
+	done := make(chan bool)
 	// 调用方法获取stream
 	stream, err := client.Route(context.Background())
 	if err != nil {
@@ -113,13 +114,14 @@ func printRoute(client pb.StreamServiceClient, r *pb.StreamRequest) error {
 	}
 
 	// 开两个goroutine 分别用于Recv()和Send()
-	wg.Add(1)
+	//wg.Add(1)
 	go func() {
-		defer wg.Done()
+		//defer wg.Done()
 		for {
 			resp, err := stream.Recv()
 			if err == io.EOF {
 				fmt.Println("Server Closed")
+				done <- true
 				break
 			}
 			if err != nil {
@@ -129,9 +131,9 @@ func printRoute(client pb.StreamServiceClient, r *pb.StreamRequest) error {
 		}
 	}()
 
-	wg.Add(1)
+	//wg.Add(1)
 	go func() {
-		defer wg.Done()
+		//defer wg.Done()
 
 		for n := 0; n <= 6; n++ {
 			err := stream.Send(r)
@@ -148,7 +150,7 @@ func printRoute(client pb.StreamServiceClient, r *pb.StreamRequest) error {
 			return
 		}
 	}()
-
-	wg.Wait()
+	<-done
+	//wg.Wait()
 	return nil
 }

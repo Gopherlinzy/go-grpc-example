@@ -7,16 +7,9 @@
 package token
 
 import (
-	"context"
-	"crypto/md5"
-	"fmt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
-	"strconv"
 	sync "sync"
 )
 
@@ -35,56 +28,6 @@ type TokenValidateParam struct {
 
 	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	Uid   int32  `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty"`
-}
-
-// 返回token信息
-func (x *TokenValidateParam) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	return map[string]string{
-		"uid" : strconv.FormatInt(int64(x.GetUid()), 10),
-		"token": x.GetToken(),
-	}, nil
-}
-
-// 自定义认证是否开启TLS
-func (x *TokenValidateParam) RequireTransportSecurity() bool {
-	return  false
-}
-
-type TokenAuth struct {
-}
-
-func (t TokenAuth) CheckToken(ctx context.Context) (*Response, error) {
-	// 验证token
-	md, b := metadata.FromIncomingContext(ctx)
-	if !b {
-		return nil, status.Error(codes.InvalidArgument, "token信息不存在")
-	}
-
-	var token, uid string
-	// 取出token
-	tokenInfo, ok := md["token"]
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "token不存在")
-	}
-
-	token = tokenInfo[0]
-
-	// 取出uid
-	uidTmp, ok := md["uid"]
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "uid不存在")
-	}
-	uid = uidTmp[0]
-
-	//验证
-	sum := md5.Sum([]byte(uid))
-	md5Str := fmt.Sprintf("%x", sum)
-	if md5Str != token {
-		fmt.Println("md5Str:", md5Str)
-		fmt.Println("password:", token)
-		return nil, status.Error(codes.InvalidArgument, "token验证失败")
-	}
-	return nil, nil
 }
 
 func (x *TokenValidateParam) Reset() {

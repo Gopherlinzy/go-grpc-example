@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"go-grpc-example/pkg/Interceptor"
 	"go-grpc-example/proto/hello"
 	"google.golang.org/grpc"
 	"log"
@@ -24,7 +25,7 @@ const PORT = "8888"
 
 func main() {
 	// 创建grpc服务
-	server := grpc.NewServer()
+	server := grpc.NewServer(grpc.UnaryInterceptor(Interceptor.UnaryServerInterceptor()))
 	// 注册服务
 	hello.RegisterUserServiceServer(server, &HelloService{})
 

@@ -9,6 +9,8 @@ package token
 import (
 	context "context"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -50,16 +52,10 @@ type TokenServiceServer interface {
 
 // UnimplementedTokenServiceServer must be embedded to have forward compatible implementations.
 type UnimplementedTokenServiceServer struct {
-	TokenAuth
 }
 
-func (u UnimplementedTokenServiceServer) Token(ctx context.Context,r *Request) (*Response, error) {
-	// 验证token
-	_, err := u.CheckToken(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &Response{Name: r.GetName()}, nil
+func (UnimplementedTokenServiceServer) Token(context.Context, *Request) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Token not implemented")
 }
 func (UnimplementedTokenServiceServer) mustEmbedUnimplementedTokenServiceServer() {}
 

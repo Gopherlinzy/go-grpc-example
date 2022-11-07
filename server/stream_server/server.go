@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go-grpc-example/pkg/Interceptor"
 	pb "go-grpc-example/proto/stream"
 	"google.golang.org/grpc"
 	"io"
@@ -18,7 +19,7 @@ type StreamService struct {
 const PORT = "8888"
 
 func main() {
-	server := grpc.NewServer() //创建 gRPC Server 对象
+	server := grpc.NewServer(grpc.StreamInterceptor(Interceptor.StreamServerInterceptor())) //创建 gRPC Server 对象
 	pb.RegisterStreamServiceServer(server, &StreamService{})
 
 	lis, err := net.Listen("tcp", ":"+PORT)
