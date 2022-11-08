@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go-grpc-example/pkg/Interceptor"
 	tokenAuth "go-grpc-example/pkg/token"
 	"go-grpc-example/proto/token"
 	"golang.org/x/net/context"
@@ -20,10 +21,12 @@ type TokenService struct {
 
 func (u TokenService) Token(ctx context.Context, r *token.Request) (*token.Response, error) {
 	// 验证token
-	_, err := u.CheckToken(ctx)
+	_, err := Interceptor.CheckToken(ctx)
 	if err != nil {
+		fmt.Println("Token RPC方法内token认证失败\n")
 		return nil, err
 	}
+	fmt.Printf("%v Token RPC方法内token认证成功\n", r.GetName())
 	return &token.Response{Name: r.GetName()}, nil
 }
 func main() {
@@ -44,6 +47,7 @@ func main() {
 		}
 		opts = append(opts, grpc.Creds(c))
 	}
+	opts = append(opts, grpc.UnaryInterceptor(Interceptor.ServerInterceptorCheckToken()))
 	server := grpc.NewServer(opts...)
 	token.RegisterTokenServiceServer(server, &TokenService{})
 
