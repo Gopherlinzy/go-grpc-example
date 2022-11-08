@@ -12,3 +12,5 @@ gRPC（四）基础：gRPC流:https://linzyblog.netlify.app/2022/11/03/grpc-stre
 gRPC（五）进阶：通过TLS建立安全连接:https://linzyblog.netlify.app/2022/11/03/grpc-tls/
 
 gRPC（六）进阶：拦截器 interceptor:https://linzyblog.netlify.app/2022/11/07/grpc-interceptor/
+
+gRPC（七）进阶：自定义身份验证：https://linzyblog.netlify.app/2022/11/08/grpc-token/
